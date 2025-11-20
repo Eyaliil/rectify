@@ -11,6 +11,7 @@ class App {
         this.isAnalyzing = false;
         this.selectedExercise = 'auto';
         this.videoElement = null;
+        this.gifElement = null;
         this.videoPlaceholder = null;
         this.defaultVideoMessage = 'Select an exercise to preview the movement.';
         this.missingVideoMessage = 'Video coming soon for this movement.';
@@ -20,7 +21,10 @@ class App {
             row: 'videos/row.mp4',
             pushup: 'videos/pushup.mp4',
             plank: 'videos/plank.mp4',
-            burpee: 'videos/burpee.mp4'
+            burpee: 'videos/burpee.mp4',
+            warrior: 'videos/warrior-pose.gif',
+            downward: 'videos/downward-dog-pose.gif',
+            tree: 'videos/tree-pose.gif'
         };
         
         // Wait for analysis view to be shown before initializing
@@ -63,6 +67,7 @@ class App {
 
     init() {
         this.videoElement = document.getElementById('exercise-video');
+        this.gifElement = document.getElementById('exercise-gif');
         this.videoPlaceholder = document.getElementById('exercise-video-placeholder');
         if (this.videoPlaceholder) {
             this.defaultVideoMessage = this.videoPlaceholder.textContent.trim() || this.defaultVideoMessage;
@@ -102,27 +107,46 @@ class App {
     }
 
     updateExerciseVideo(exerciseId) {
-        if (!this.videoElement) return;
+        if (!this.videoElement || !this.gifElement) return;
 
         const videoSource = this.getVideoSource(exerciseId);
 
         if (videoSource) {
-            if (this.videoElement.getAttribute('src') !== videoSource) {
-                this.videoElement.setAttribute('src', videoSource);
-                this.videoElement.load();
+            const isGif = videoSource.toLowerCase().endsWith('.gif');
+            if (isGif) {
+                this.gifElement.setAttribute('src', videoSource);
+                this.gifElement.style.display = 'block';
+                if (this.videoElement.hasAttribute('src')) {
+                    this.videoElement.removeAttribute('src');
+                    this.videoElement.load();
+                }
+                this.videoElement.style.display = 'none';
+            } else {
+                if (this.videoElement.getAttribute('src') !== videoSource) {
+                    this.videoElement.setAttribute('src', videoSource);
+                    this.videoElement.load();
+                }
+                this.videoElement.style.display = 'block';
+                if (this.gifElement.hasAttribute('src')) {
+                    this.gifElement.removeAttribute('src');
+                }
+                this.gifElement.style.display = 'none';
             }
-            this.videoElement.style.display = 'block';
             if (this.videoPlaceholder) {
                 this.videoPlaceholder.style.display = 'none';
                 this.videoPlaceholder.textContent = this.defaultVideoMessage;
             }
         } else {
-            const hadSource = this.videoElement.hasAttribute('src');
+            const hadVideoSource = this.videoElement.hasAttribute('src');
             this.videoElement.removeAttribute('src');
-            if (hadSource) {
+            if (hadVideoSource) {
                 this.videoElement.load();
             }
             this.videoElement.style.display = 'none';
+            if (this.gifElement.hasAttribute('src')) {
+                this.gifElement.removeAttribute('src');
+            }
+            this.gifElement.style.display = 'none';
             if (this.videoPlaceholder) {
                 this.videoPlaceholder.style.display = 'block';
                 if (exerciseId && exerciseId !== 'auto') {

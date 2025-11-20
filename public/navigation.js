@@ -18,9 +18,9 @@ export class Navigation {
                 { id: 'burpee', name: 'Burpee', icon: '⚡', video: 'videos/burpee.mp4' }
             ],
             'yoga': [
-                { id: 'warrior', name: 'Warrior Pose', icon: '🧘‍♀️' },
-                { id: 'downward', name: 'Downward Dog', icon: '🐕' },
-                { id: 'tree', name: 'Tree Pose', icon: '🌳' }
+                { id: 'warrior', name: 'Warrior Pose', icon: '🧘‍♀️', video: 'videos/warrior-pose.gif' },
+                { id: 'downward', name: 'Downward Dog', icon: '🐕', video: 'videos/downward-dog-pose.gif' },
+                { id: 'tree', name: 'Tree Pose', icon: '🌳', video: 'videos/tree-pose.gif' }
             ]
         };
     }
@@ -66,9 +66,17 @@ export class Navigation {
         exercises.forEach(exercise => {
             const card = document.createElement('div');
             card.className = 'exercise-card';
-            const preview = exercise.video
-                ? `<video class="exercise-preview-video" src="${exercise.video}" playsinline muted loop preload="metadata"></video>`
-                : `<div class="exercise-icon">${exercise.icon}</div>`;
+            let preview;
+            if (exercise.video) {
+                const isGif = exercise.video.toLowerCase().endsWith('.gif');
+                if (isGif) {
+                    preview = `<img class="exercise-preview-gif" src="${exercise.video}" alt="${exercise.name} preview" loading="lazy">`;
+                } else {
+                    preview = `<video class="exercise-preview-video" src="${exercise.video}" playsinline muted loop preload="metadata"></video>`;
+                }
+            } else {
+                preview = `<div class="exercise-icon">${exercise.icon}</div>`;
+            }
 
             card.innerHTML = `
                 <div class="exercise-preview">${preview}</div>
