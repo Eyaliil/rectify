@@ -106,3 +106,7 @@ out/
 .yarn/install-state.gz
 .pnp.*
 
+trained/
+venv/
+.temp/
+
