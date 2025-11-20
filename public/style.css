@@ -367,6 +367,68 @@ header p {
   cursor: pointer;
 }
 
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.form-group input,
+.form-group select {
+  padding: 8px 12px;
+  border-radius: calc(var(--radius) - 4px);
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.sensor-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: hsl(var(--danger));
+  box-shadow: 0 0 10px hsl(var(--danger) / 0.7);
+}
+
+.status-connected {
+  background: hsl(var(--success));
+  box-shadow: 0 0 8px hsl(var(--success) / 0.8);
+}
+
+.status-connecting {
+  background: hsl(var(--warning));
+  box-shadow: 0 0 8px hsl(var(--warning) / 0.8);
+}
+
+.status-disconnected {
+  background: hsl(var(--danger));
+  box-shadow: 0 0 8px hsl(var(--danger) / 0.8);
+}
+
 /* Side Panel */
 .side-panel {
   display: flex;

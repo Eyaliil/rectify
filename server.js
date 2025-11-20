@@ -2,13 +2,13 @@ const express = require('express');
 const path = require('path');
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve exercise videos
-app.use('/videos', express.static(path.join(__dirname, 'videos')));
+// Serve exercise videos from public/videos
+app.use('/videos', express.static(path.join(__dirname, 'public', 'videos')));
 
 // Route for homepage
 app.get('/', (req, res) => {
@@ -16,6 +16,6 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Rectify frontend running at http://localhost:${PORT}`);
 });
 

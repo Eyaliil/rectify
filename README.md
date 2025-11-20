@@ -33,29 +33,66 @@ An intelligent web application that uses AI and sensor data analysis to automati
    - Modular architecture ready for ML model integration
    - UI remains idle until external data is supplied
 
+## Architecture Overview
+
+Rectify now ships with a dedicated FlexTail sensor backend alongside the original Three.js dashboard:
+
+- **Frontend**: Express.js server hosting the static dashboard in `public/`.
+- **Backend**: Flask + Socket.IO service in `backend/app.py` that manages FlexTail hardware connections and streams measurements over websockets.
+
+You can run the layers independently or together, depending on whether live sensor data is required.
+
 ## Prerequisites
 
-- Node.js (v14 or higher)
-- npm (comes with Node.js)
+- Node.js (v16 or higher) + npm
+- Python 3.10+ (for the backend) with `uv` or `pip`
+- FlexTail hardware plus the `flexlib` and `fiffi_unleashed` wheels (see `backend/README.md`)
 
 ## Installation
 
-1. Install dependencies:
 ```bash
+# Frontend
 npm install
+
+# Backend
+cd backend
+uv venv  # or python -m venv .venv
+uv pip install -r requirements.txt
+# Install flexlib + fiffi_unleashed wheels as documented in backend/README.md
 ```
 
 ## Running the Application
 
-Start the server:
 ```bash
+# Terminal 1 – frontend (http://localhost:4000 by default)
 npm start
+
+# Terminal 2 – backend (http://localhost:5000 by default)
+npm run backend  # runs python backend/app.py
 ```
 
-The application will be available at:
-```
-http://localhost:4000
-```
+Set the environment variables below if you need to change ports or hosts.
+
+## Environment Variables
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `PORT` | `4000` | Port for the Express frontend server |
+| `FLEXTAIL_BACKEND_HOST` | `0.0.0.0` | Bind host for the Flask backend |
+| `FLEXTAIL_BACKEND_PORT` | `5000` | Port for the Flask backend |
+| `FLEXTAIL_BACKEND_DEBUG` | `true` | Enables Flask debug mode when `true` |
+| `FLEXTAIL_BACKEND_URL` (frontend) | `protocol//hostname:5000` | Override Socket.IO bridge URL by defining `window.FLEXTAIL_BACKEND_URL` before `main.js` |
+
+## Live Sensor Bridge
+
+The dashboard now auto-connects to the Flask backend via Socket.IO (see `public/main.js`). Every `measurement_data` event is translated into the radians-based payload that `window.app.ingestSensorData()` expects, so starting the backend plus the frontend is enough to see live FlexTail data—no manual wiring required. A **Sensor Connection** card in the UI lets you enter the FlexTail MAC address, select hardware version, and start/stop streaming; those controls emit the same Socket.IO events the original sensor web app used.
+
+To customize:
+
+- Default target: same protocol/host as the page, port `5000`
+- Override port via `window.FLEXTAIL_BACKEND_PORT = 6000`
+- Override URL via `window.FLEXTAIL_BACKEND_URL = 'https://my-backend.example.com'`
+- The Socket.IO client is pulled from `https://cdn.socket.io`
 
 ## Usage
 
@@ -70,6 +107,10 @@ http://localhost:4000
 rectify/
 ├── server.js              # Express server configuration
 ├── package.json           # Project dependencies
+├── backend/               # Flask + Socket.IO sensor backend
+│   ├── app.py             # Backend entry point
+│   ├── requirements.txt   # Python dependencies
+│   └── README.md          # Backend-specific setup
 ├── README.md             # This file
 └── public/
     ├── index.html        # Main dashboard UI

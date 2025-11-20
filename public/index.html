@@ -111,6 +111,40 @@
                     
                     <!-- Side Panel -->
                     <div class="side-panel">
+                        <!-- Sensor Connection Card -->
+                        <div class="card">
+                            <h3>Sensor Connection</h3>
+                            <p class="card-description">Manage FlexTail hardware</p>
+                            <div class="form-group">
+                                <label for="sensor-mac">MAC Address (optional)</label>
+                                <input id="sensor-mac" type="text" placeholder="AA:BB:CC:DD:EE:FF" />
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="sensor-hw">Hardware Version</label>
+                                    <select id="sensor-hw">
+                                        <option value="6.0">HW 6.0</option>
+                                        <option value="5.0">HW 5.0</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sensor-frequency">Frequency (Hz)</label>
+                                    <input id="sensor-frequency" type="number" min="1" max="100" value="25" />
+                                </div>
+                            </div>
+                            <div class="controls" style="margin-top: 12px;">
+                                <button id="sensor-connect-btn" class="btn btn-primary">Connect</button>
+                                <button id="sensor-disconnect-btn" class="btn btn-secondary">Disconnect</button>
+                            </div>
+                            <div class="controls" style="margin-top: 8px;">
+                                <button id="sensor-start-btn" class="btn btn-primary">Start Streaming</button>
+                                <button id="sensor-stop-btn" class="btn btn-secondary">Stop Streaming</button>
+                            </div>
+                            <div id="sensor-status" class="sensor-status">
+                                <span class="status-dot status-disconnected"></span>
+                                <span id="sensor-status-text">Disconnected</span>
+                            </div>
+                        </div>
                         <!-- Exercise Recognition Card -->
                         <div class="card">
                             <h3>Exercise Recognition</h3>
@@ -241,6 +275,7 @@
         }
     }
     </script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script type="module" src="navigation.js"></script>
     <script type="module" src="FlexTail3DViewer.js"></script>
     <script type="module" src="exerciseAnalyzer.js"></script>

@@ -3,6 +3,147 @@
 import { ExerciseAnalyzer } from './exerciseAnalyzer.js';
 import { FlexTail3DViewer } from './FlexTail3DViewer.js';
 
+const DEFAULT_BACKEND_PORT = 5000;
+
+class FlexTailSocketBridge {
+    constructor(appInstance) {
+        this.app = appInstance;
+        this.socket = null;
+        this.connected = false;
+        this.backendUrl = this.resolveBackendUrl();
+        this.connectionStatusListeners = [];
+        this.streamingStatusListeners = [];
+        this.errorListeners = [];
+    }
+
+    resolveBackendUrl() {
+        if (window.FLEXTAIL_BACKEND_URL) {
+            return window.FLEXTAIL_BACKEND_URL;
+        }
+
+        const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+        const hostname = window.location.hostname || 'localhost';
+        const port = window.FLEXTAIL_BACKEND_PORT || DEFAULT_BACKEND_PORT;
+        return `${protocol}//${hostname}:${port}`;
+    }
+
+    initialize() {
+        if (typeof window.io !== 'function') {
+            console.warn('[FlexTailBridge] Socket.IO client is not available. Skipping live sensor bridge.');
+            return;
+        }
+
+        this.socket = window.io(this.backendUrl, {
+            transports: ['websocket', 'polling'],
+            path: '/socket.io'
+        });
+
+        this.registerEventHandlers();
+    }
+
+    registerEventHandlers() {
+        if (!this.socket) return;
+
+        this.socket.on('connect', () => {
+            this.connected = true;
+            console.info(`[FlexTailBridge] Connected to backend at ${this.backendUrl}`);
+            this.emitConnectionStatus({ status: 'ready' });
+        });
+
+        this.socket.on('disconnect', () => {
+            this.connected = false;
+            console.warn('[FlexTailBridge] Disconnected from backend.');
+            this.emitConnectionStatus({ status: 'disconnected' });
+        });
+
+        this.socket.on('connect_error', (error) => {
+            console.error('[FlexTailBridge] Connection error:', error?.message || error);
+            this.emitError(error);
+        });
+
+        this.socket.on('measurement_data', (payload) => {
+            this.handleMeasurement(payload);
+        });
+
+        this.socket.on('connection_status', (payload) => {
+            this.emitConnectionStatus(payload);
+        });
+
+        this.socket.on('streaming_status', (payload) => {
+            this.emitStreamingStatus(payload);
+        });
+
+        this.socket.on('error', (payload) => {
+            this.emitError(payload);
+        });
+    }
+
+    handleMeasurement(payload) {
+        if (!payload || !this.app) return;
+
+        const radians = (value) =>
+            typeof value === 'number' ? (value * Math.PI) / 180 : 0;
+
+        const sensorPacket = {
+            lumbarAngle: radians(payload.bend),
+            sagittal: radians(payload.pitch),
+            lateral: radians(payload.roll),
+            twist: radians(payload.yaw || 0),
+            acceleration: payload.acceleration ?? payload.accel ?? 0
+        };
+
+        // Forward to the existing ingestion pipeline.
+        this.app.ingestSensorData(sensorPacket);
+    }
+
+    connectSensor({ macAddress, hardwareVersion }) {
+        if (!this.socket) return;
+        this.socket.emit('connect_sensor', {
+            mac_address: macAddress || undefined,
+            hw_version: hardwareVersion || '6.0'
+        });
+    }
+
+    disconnectSensor() {
+        if (!this.socket) return;
+        this.socket.emit('disconnect_sensor');
+    }
+
+    startMeasurement(frequency = 25) {
+        if (!this.socket) return;
+        this.socket.emit('start_measurement', { frequency });
+    }
+
+    stopMeasurement() {
+        if (!this.socket) return;
+        this.socket.emit('stop_measurement');
+    }
+
+    onConnectionStatus(callback) {
+        this.connectionStatusListeners.push(callback);
+    }
+
+    onStreamingStatus(callback) {
+        this.streamingStatusListeners.push(callback);
+    }
+
+    onError(callback) {
+        this.errorListeners.push(callback);
+    }
+
+    emitConnectionStatus(payload) {
+        this.connectionStatusListeners.forEach((cb) => cb(payload));
+    }
+
+    emitStreamingStatus(payload) {
+        this.streamingStatusListeners.forEach((cb) => cb(payload));
+    }
+
+    emitError(payload) {
+        this.errorListeners.forEach((cb) => cb(payload));
+    }
+}
+
 class App {
     constructor() {
         this.analyzer = new ExerciseAnalyzer();
@@ -479,6 +620,84 @@ class App {
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new App();
+    window.flexTailBridge = new FlexTailSocketBridge(window.app);
+    window.flexTailBridge.initialize();
+    setupSensorControls(window.flexTailBridge);
     // Don't initialize immediately - wait for analysis view to be shown
 });
+
+function setupSensorControls(bridge) {
+    const macInput = document.getElementById('sensor-mac');
+    const hwSelect = document.getElementById('sensor-hw');
+    const freqInput = document.getElementById('sensor-frequency');
+    const connectBtn = document.getElementById('sensor-connect-btn');
+    const disconnectBtn = document.getElementById('sensor-disconnect-btn');
+    const startBtn = document.getElementById('sensor-start-btn');
+    const stopBtn = document.getElementById('sensor-stop-btn');
+    const statusDot = document.querySelector('#sensor-status .status-dot');
+    const statusText = document.getElementById('sensor-status-text');
+
+    if (!macInput || !connectBtn || !statusDot) return;
+
+    const setStatus = (label, state) => {
+        statusText.textContent = label;
+        statusDot.classList.remove('status-connected', 'status-connecting', 'status-disconnected');
+        statusDot.classList.add(`status-${state}`);
+    };
+
+    connectBtn.addEventListener('click', () => {
+        const macAddress = macInput.value.trim();
+        const hardwareVersion = hwSelect.value;
+        setStatus('Connecting…', 'connecting');
+        bridge.connectSensor({ macAddress, hardwareVersion });
+    });
+
+    disconnectBtn.addEventListener('click', () => {
+        bridge.disconnectSensor();
+        setStatus('Disconnecting…', 'connecting');
+    });
+
+    startBtn.addEventListener('click', () => {
+        const frequency = parseInt(freqInput.value, 10) || 25;
+        bridge.startMeasurement(frequency);
+    });
+
+    stopBtn.addEventListener('click', () => {
+        bridge.stopMeasurement();
+    });
+
+    bridge.onConnectionStatus((payload = {}) => {
+        const status = payload.status || 'unknown';
+        switch (status) {
+            case 'connected':
+                setStatus('Connected', 'connected');
+                break;
+            case 'connecting':
+            case 'retrying':
+            case 'reconnecting':
+                setStatus('Connecting…', 'connecting');
+                break;
+            case 'failed':
+                setStatus('Failed to connect', 'disconnected');
+                break;
+            case 'disconnected':
+                setStatus('Disconnected', 'disconnected');
+                break;
+            default:
+                setStatus(status, 'connecting');
+        }
+    });
+
+    bridge.onStreamingStatus((payload = {}) => {
+        if (payload.streaming) {
+            setStatus('Streaming', 'connected');
+        }
+    });
+
+    bridge.onError((payload = {}) => {
+        if (payload.message) {
+            console.error('[FlexTailBridge] Error:', payload.message);
+        }
+    });
+}
 

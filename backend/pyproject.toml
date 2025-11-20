@@ -1,0 +1,20 @@
+[project]
+name = "flextail-sensor-backend"
+version = "1.0.0"
+description = "Flask backend for FlexTail sensor web interface"
+requires-python = ">=3.8"
+dependencies = [
+    "flask>=3.0.0",
+    "flask-socketio>=5.3.5",
+    "flask-cors>=4.0.0",
+    "python-socketio>=5.10.0",
+    "eventlet>=0.33.3",
+    "bleak>=1.1.1",
+    "pandas>=2.0.0",
+    "pyserial>=3.5",
+    "textual>=0.40.0",
+]
+
+# Note: flexlib and fiffi_unleashed must be installed from wheel files:
+# uv pip install ../../flexlib/flexlib-1.1.1-cp312-cp312-win_amd64.whl
+# uv pip install ../../fiffi_unleashed/dist/fiffi_unleashed-0.0.3b0-py3-none-any.whl
