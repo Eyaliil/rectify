@@ -183,8 +183,9 @@ export class FlexTail3DViewer {
     const rightPoints = [];
     
     for (let i = 0; i <= n; i++) {
-      leftPoints.push(new THREE.Vector3(r.left.x[i], r.left.y[i], r.left.z[i]));
-      rightPoints.push(new THREE.Vector3(r.right.x[i], r.right.y[i], r.right.z[i]));
+      // Invert Y to flip bend direction
+      leftPoints.push(new THREE.Vector3(r.left.x[i], -r.left.y[i], r.left.z[i]));
+      rightPoints.push(new THREE.Vector3(r.right.x[i], -r.right.y[i], r.right.z[i]));
     }
 
     const leftCurve = new THREE.CatmullRomCurve3(leftPoints);
@@ -303,7 +304,8 @@ export class FlexTail3DViewer {
       const avgPitch = (o.pitch + this.lastOrientation.pitch) / 2;
       const avgRoll = (-o.roll - this.lastOrientation.roll) / 2;
       
-      this.flextailMesh.rotation.set(avgPitch - Math.PI / 2, avgRoll, 0);
+      // Adjusted offset so 90 degrees pitch corresponds to laying flat and pointing right
+      this.flextailMesh.rotation.set(avgPitch, avgRoll, 0);
       
       this.lastOrientation = o;
     }
@@ -342,6 +344,36 @@ export class FlexTail3DViewer {
     this.renderer.setSize(width, height);
   }
 
+  /**
+   * Reset camera to default position
+   */
+  resetCamera() {
+    this.camera.position.set(450, 100, 0);
+    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+    this.controls.reset();
+    this.render();
+  }
+
+  /**
+   * Toggle accelerometer-based orientation
+   */
+  toggleAccelerometer() {
+    this.options.useAccelerometer = !this.options.useAccelerometer;
+    if (!this.options.useAccelerometer) {
+      this.flextailMesh.rotation.set(-Math.PI / 2, 0, 0);
+    }
+    this.render();
+  }
+
+  /**
+   * Toggle ground plane visibility
+   */
+  toggleGroundPlane() {
+    if (this.groundPlane) {
+      this.groundPlane.visible = !this.groundPlane.visible;
+      this.render();
+    }
+  }
 
   /**
    * Clean up resources
