@@ -1,17 +1,27 @@
 // Main Application Controller
 
 import { ExerciseAnalyzer } from './exerciseAnalyzer.js';
-import { BodyVisualizer } from './bodyVisualizer.js';
 import { FlexTail3DViewer } from './FlexTail3DViewer.js';
 
 class App {
     constructor() {
         this.analyzer = new ExerciseAnalyzer();
-        this.visualizer = null;
         this.flextailViewer = null;
         
         this.isAnalyzing = false;
         this.selectedExercise = 'auto';
+        this.videoElement = null;
+        this.videoPlaceholder = null;
+        this.defaultVideoMessage = 'Select an exercise to preview the movement.';
+        this.missingVideoMessage = 'Video coming soon for this movement.';
+        this.exerciseVideos = {
+            squat: 'videos/squat.mp4',
+            deadlift: 'videos/deadlift.mp4',
+            row: 'videos/row.mp4',
+            pushup: 'videos/pushup.mp4',
+            plank: 'videos/plank.mp4',
+            burpee: 'videos/burpee.mp4'
+        };
         
         // Wait for analysis view to be shown before initializing
         this.initialized = false;
@@ -28,6 +38,7 @@ class App {
     // Set exercise from navigation
     setExercise(exerciseId) {
         this.selectedExercise = exerciseId;
+        this.updateExerciseVideo(exerciseId);
         // Map exercise IDs to analyzer format
         const exerciseMap = {
             'squat': 'squat',
@@ -51,11 +62,12 @@ class App {
     }
 
     init() {
-        // Initialize 3D body visualizer (only if container exists)
-        const container = document.getElementById('canvas-container');
-        if (container) {
-            this.visualizer = new BodyVisualizer(container);
+        this.videoElement = document.getElementById('exercise-video');
+        this.videoPlaceholder = document.getElementById('exercise-video-placeholder');
+        if (this.videoPlaceholder) {
+            this.defaultVideoMessage = this.videoPlaceholder.textContent.trim() || this.defaultVideoMessage;
         }
+        this.updateExerciseVideo(this.selectedExercise);
 
         // Initialize FlexTail 3D viewer (only if container exists)
         const flextailContainer = document.getElementById('flextail-container');
@@ -85,7 +97,46 @@ class App {
         stopBtn.addEventListener('click', () => this.stopAnalysis());
         exerciseSelect.addEventListener('change', (e) => {
             this.selectedExercise = e.target.value;
+            this.updateExerciseVideo(this.selectedExercise);
         });
+    }
+
+    updateExerciseVideo(exerciseId) {
+        if (!this.videoElement) return;
+
+        const videoSource = this.getVideoSource(exerciseId);
+
+        if (videoSource) {
+            if (this.videoElement.getAttribute('src') !== videoSource) {
+                this.videoElement.setAttribute('src', videoSource);
+                this.videoElement.load();
+            }
+            this.videoElement.style.display = 'block';
+            if (this.videoPlaceholder) {
+                this.videoPlaceholder.style.display = 'none';
+                this.videoPlaceholder.textContent = this.defaultVideoMessage;
+            }
+        } else {
+            const hadSource = this.videoElement.hasAttribute('src');
+            this.videoElement.removeAttribute('src');
+            if (hadSource) {
+                this.videoElement.load();
+            }
+            this.videoElement.style.display = 'none';
+            if (this.videoPlaceholder) {
+                this.videoPlaceholder.style.display = 'block';
+                if (exerciseId && exerciseId !== 'auto') {
+                    this.videoPlaceholder.textContent = this.missingVideoMessage;
+                } else {
+                    this.videoPlaceholder.textContent = this.defaultVideoMessage;
+                }
+            }
+        }
+    }
+
+    getVideoSource(exerciseId) {
+        if (!exerciseId || exerciseId === 'auto') return null;
+        return this.exerciseVideos[exerciseId] || null;
     }
 
     startAnalysis() {
@@ -259,11 +310,6 @@ class App {
         // Adapt data to internal format
         const sensorData = this.adaptSensorData(rawSensorData);
 
-        // Update 3D body visualization
-        if (this.visualizer) {
-            this.visualizer.updatePose(sensorData);
-        }
-
         // Update FlexTail spine visualization
         if (this.flextailViewer) {
             const flextailMeasurement = this.convertToFlexTailMeasurement(rawSensorData, sensorData);
@@ -281,11 +327,6 @@ class App {
 
         // Generate feedback
         const feedback = this.analyzer.generateFeedback(exercise, metrics);
-
-        // Update quality visualization
-        if (this.visualizer) {
-            this.visualizer.updateQualityFeedback(metrics);
-        }
 
         // Update UI (pass both raw and adapted data)
         this.updateUI(rawSensorData, sensorData, recognition, metrics, feedback);

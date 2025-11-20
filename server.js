@@ -7,6 +7,9 @@ const PORT = 4000;
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve exercise videos
+app.use('/videos', express.static(path.join(__dirname, 'videos')));
+
 // Route for homepage
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

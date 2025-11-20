@@ -74,8 +74,21 @@
                             <p class="card-description">Real-time body and spine analysis</p>
                             <div class="visualization-grid">
                                 <div class="viz-container">
-                                    <h3 class="viz-title">Body Skeleton</h3>
-                                    <div id="canvas-container"></div>
+                                    <h3 class="viz-title">Exercise Demo</h3>
+                                    <div class="exercise-video-panel">
+                                        <video
+                                            id="exercise-video"
+                                            class="exercise-video"
+                                            playsinline
+                                            muted
+                                            loop
+                                            preload="metadata"
+                                            controls
+                                        ></video>
+                                        <p id="exercise-video-placeholder" class="video-placeholder">
+                                            Select an exercise to preview the movement.
+                                        </p>
+                                    </div>
                                 </div>
                                 <div class="viz-container">
                                     <h3 class="viz-title">Spine Visualization</h3>
@@ -231,7 +244,6 @@
     <script type="module" src="navigation.js"></script>
     <script type="module" src="FlexTail3DViewer.js"></script>
     <script type="module" src="exerciseAnalyzer.js"></script>
-    <script type="module" src="bodyVisualizer.js"></script>
     <script type="module" src="main.js"></script>
     <script type="module" src="app.js"></script>
 </body>
