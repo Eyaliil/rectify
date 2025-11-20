@@ -1,0 +1,18 @@
+{
+  "name": "rectify-webapp",
+  "version": "1.0.0",
+  "description": "A webapp with Three.js visualization",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["threejs", "webapp"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "three": "^0.158.0"
+  }
+}
+
