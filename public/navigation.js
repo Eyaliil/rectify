@@ -8,14 +8,14 @@ export class Navigation {
         
         this.exercises = {
             'weightlifting': [
-                { id: 'squat', name: 'Squat', icon: '🏋️' },
-                { id: 'deadlift', name: 'Deadlift', icon: '💪' },
-                { id: 'row', name: 'Row', icon: '🚣' }
+                { id: 'squat', name: 'Squat', icon: '🏋️', video: 'videos/squat.mp4' },
+                { id: 'deadlift', name: 'Deadlift', icon: '💪', video: 'videos/deadlift.mp4' },
+                { id: 'row', name: 'Row', icon: '🚣', video: 'videos/row.mp4' }
             ],
             'cardio': [
-                { id: 'pushup', name: 'Push-up', icon: '🤸' },
-                { id: 'plank', name: 'Plank', icon: '🧘' },
-                { id: 'burpee', name: 'Burpee', icon: '⚡' }
+                { id: 'pushup', name: 'Push-up', icon: '🤸', video: 'videos/pushup.mp4' },
+                { id: 'plank', name: 'Plank', icon: '🧘', video: 'videos/plank.mp4' },
+                { id: 'burpee', name: 'Burpee', icon: '⚡', video: 'videos/burpee.mp4' }
             ],
             'yoga': [
                 { id: 'warrior', name: 'Warrior Pose', icon: '🧘‍♀️' },
@@ -66,8 +66,12 @@ export class Navigation {
         exercises.forEach(exercise => {
             const card = document.createElement('div');
             card.className = 'exercise-card';
+            const preview = exercise.video
+                ? `<video class="exercise-preview-video" src="${exercise.video}" playsinline muted loop preload="metadata"></video>`
+                : `<div class="exercise-icon">${exercise.icon}</div>`;
+
             card.innerHTML = `
-                <div class="exercise-icon">${exercise.icon}</div>
+                <div class="exercise-preview">${preview}</div>
                 <h3>${exercise.name}</h3>
             `;
             card.addEventListener('click', () => {
