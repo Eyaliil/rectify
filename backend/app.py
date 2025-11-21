@@ -115,14 +115,27 @@ class SensorManager:
 
             # AI Classification
             if ai_enabled and ai_classifier and ai_classifier.is_loaded:
-                # Match what the current model expects (it was trained with zeros for sagittal/lateral/acc)
+                # Extract ALL 8 features for the NEW model
+                # Calculate acceleration magnitude (acc is a list [x, y, z])
+                acc_mag = 0.0
+                if hasattr(measurement, 'acc') and isinstance(measurement.acc, list) and len(measurement.acc) >= 3:
+                    acc_mag = (measurement.acc[0]**2 + measurement.acc[1]**2 + measurement.acc[2]**2)**0.5
+
+                # Calculate gyro magnitude (gyro is a list [x, y, z])
+                gyro_mag = 0.0
+                if hasattr(measurement, 'gyro') and measurement.gyro and isinstance(measurement.gyro, list) and len(measurement.gyro) >= 3:
+                    gyro_mag = (measurement.gyro[0]**2 + measurement.gyro[1]**2 + measurement.gyro[2]**2)**0.5
+
                 ai_data = {
                     'timestamp': measurement.timestamp,
-                    'lumbarAngle': angles.bend,        # ✓ Trained on this
-                    'sagittal': 0.0,                   # Was 0 in training (attributes didn't exist)
-                    'lateral': 0.0,                    # Was 0 in training (attributes didn't exist)
-                    'twist': angles.twist,             # ✓ Trained on this
-                    'acceleration': 0.0                # Was 0 in training (acc is list, not object)
+                    'lumbarAngle': angles.bend,
+                    'twist': angles.twist,
+                    'lateral': measurement.lateral_flexion if hasattr(measurement, 'lateral_flexion') else 0.0,
+                    'sagittal': measurement.sagittal_flexion if hasattr(measurement, 'sagittal_flexion') else 0.0,
+                    'lateralApprox': measurement.calc_lateral_approx() if hasattr(measurement, 'calc_lateral_approx') else 0.0,
+                    'sagittalApprox': measurement.calc_sagittal_approx() if hasattr(measurement, 'calc_sagittal_approx') else 0.0,
+                    'acceleration': acc_mag,
+                    'gyro': gyro_mag
                 }
 
                 # Add measurement to classifier buffer

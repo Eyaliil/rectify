@@ -117,14 +117,17 @@ class ExerciseClassifierInference:
         Returns:
             list: Feature vector [lumbarAngle, sagittal, lateral, twist, acceleration]
         """
-        # Extract features in SAME ORDER as training data
+        # Extract ALL 8 features in SAME ORDER as training data
         # These are in RADIANS (matching the training data format)
         features = [
-            measurement_data.get('lumbarAngle', 0.0),   # angles.bend (radians)
-            measurement_data.get('sagittal', 0.0),      # angles.sagittal (radians)
-            measurement_data.get('lateral', 0.0),       # angles.lateral (radians)
-            measurement_data.get('twist', 0.0),         # angles.twist (radians)
-            measurement_data.get('acceleration', 0.0)   # acc.norm()
+            measurement_data.get('lumbarAngle', 0.0),      # angles.bend (radians)
+            measurement_data.get('twist', 0.0),            # angles.twist (radians)
+            measurement_data.get('lateral', 0.0),          # measurement.lateral_flexion (radians)
+            measurement_data.get('sagittal', 0.0),         # measurement.sagittal_flexion (radians)
+            measurement_data.get('lateralApprox', 0.0),    # measurement.calc_lateral_approx()
+            measurement_data.get('sagittalApprox', 0.0),   # measurement.calc_sagittal_approx()
+            measurement_data.get('acceleration', 0.0),     # magnitude of acc [x,y,z]
+            measurement_data.get('gyro', 0.0)              # magnitude of gyro [x,y,z]
         ]
 
         return features

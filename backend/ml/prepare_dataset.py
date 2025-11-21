@@ -26,7 +26,7 @@ class ExerciseDatasetBuilder:
         data_dir="data/recordings",
         window_size=150,  # 3 seconds at 50Hz
         stride=50,        # 1 second stride
-        features=['lumbarAngle', 'sagittal', 'lateral', 'twist', 'acceleration']
+        features=['lumbarAngle', 'twist', 'lateral', 'sagittal', 'lateralApprox', 'sagittalApprox', 'acceleration', 'gyro']
     ):
         """
         Args:
@@ -111,22 +111,26 @@ class ExerciseDatasetBuilder:
                 if angles is None:
                     continue
 
-                # Calculate acceleration magnitude
+                # Calculate acceleration magnitude (acc is a list [x, y, z])
                 acc_mag = 0.0
-                if hasattr(measurement, 'acc'):
-                    acc = measurement.acc
-                    if hasattr(acc, 'norm'):
-                        acc_mag = acc.norm()
-                    elif hasattr(acc, 'x') and hasattr(acc, 'y') and hasattr(acc, 'z'):
-                        acc_mag = (acc.x**2 + acc.y**2 + acc.z**2)**0.5
+                if hasattr(measurement, 'acc') and isinstance(measurement.acc, list) and len(measurement.acc) >= 3:
+                    acc_mag = (measurement.acc[0]**2 + measurement.acc[1]**2 + measurement.acc[2]**2)**0.5
 
-                # Extract features
+                # Calculate gyro magnitude (gyro is a list [x, y, z])
+                gyro_mag = 0.0
+                if hasattr(measurement, 'gyro') and measurement.gyro and isinstance(measurement.gyro, list) and len(measurement.gyro) >= 3:
+                    gyro_mag = (measurement.gyro[0]**2 + measurement.gyro[1]**2 + measurement.gyro[2]**2)**0.5
+
+                # Extract all 8 features with CORRECT attribute names
                 row = [
-                    angles.bend if hasattr(angles, 'bend') else 0.0,              # lumbarAngle
-                    angles.sagittal if hasattr(angles, 'sagittal') else 0.0,      # sagittal
-                    angles.lateral if hasattr(angles, 'lateral') else 0.0,        # lateral
-                    angles.twist if hasattr(angles, 'twist') else 0.0,            # twist
-                    acc_mag                                                        # acceleration
+                    angles.bend if hasattr(angles, 'bend') else 0.0,                                          # lumbarAngle
+                    angles.twist if hasattr(angles, 'twist') else 0.0,                                        # twist
+                    measurement.lateral_flexion if hasattr(measurement, 'lateral_flexion') else 0.0,          # lateral
+                    measurement.sagittal_flexion if hasattr(measurement, 'sagittal_flexion') else 0.0,        # sagittal
+                    measurement.calc_lateral_approx() if hasattr(measurement, 'calc_lateral_approx') else 0.0, # lateralApprox
+                    measurement.calc_sagittal_approx() if hasattr(measurement, 'calc_sagittal_approx') else 0.0, # sagittalApprox
+                    acc_mag,                                                                                   # acceleration
+                    gyro_mag                                                                                   # gyro
                 ]
                 data.append(row)
 
