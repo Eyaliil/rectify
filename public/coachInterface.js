@@ -38,6 +38,29 @@ class CoachInterface {
     }
 
     createUI() {
+        // Find the AI Exercise Classification panel
+        const aiPanel = document.querySelector('.ai-panel');
+        
+        if (!aiPanel) {
+            // Wait a bit for AI panel to be created
+            setTimeout(() => this.createUI(), 100);
+            return;
+        }
+
+        // Create a container for both panels if it doesn't exist
+        let aiPanelsContainer = document.querySelector('.ai-panels-container');
+        if (!aiPanelsContainer) {
+            aiPanelsContainer = document.createElement('div');
+            aiPanelsContainer.className = 'ai-panels-container';
+            
+            // Insert container where AI panel currently is
+            const parent = aiPanel.parentElement;
+            parent.insertBefore(aiPanelsContainer, aiPanel);
+            
+            // Move AI panel into the container
+            aiPanelsContainer.appendChild(aiPanel);
+        }
+
         // Main coach panel
         const panel = document.createElement('div');
         panel.id = 'coach-panel';
@@ -108,29 +131,44 @@ class CoachInterface {
         // Add styles
         this.addStyles();
 
-        // Append to body
-        document.body.appendChild(panel);
+        // Insert coach panel next to AI panel
+        aiPanelsContainer.appendChild(panel);
 
         // Setup event listeners
-        document.getElementById('coach-toggle').addEventListener('click', () => this.toggleCoach());
-        document.getElementById('session-reset').addEventListener('click', () => this.resetSession());
+        const toggleBtn = document.getElementById('coach-toggle');
+        const resetBtn = document.getElementById('session-reset');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => this.toggleCoach());
+        }
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => this.resetSession());
+        }
     }
 
     addStyles() {
         const style = document.createElement('style');
         style.textContent = `
+            .ai-panels-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+
+            @media (max-width: 1200px) {
+                .ai-panels-container {
+                    grid-template-columns: 1fr;
+                }
+            }
+
             #coach-panel {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                width: 320px;
                 background: linear-gradient(135deg, #1a5f2a 0%, #0d3d18 100%);
-                border-radius: 16px;
+                border-radius: 12px;
                 padding: 20px;
                 color: white;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                z-index: 1000;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             }
 
             .coach-header {

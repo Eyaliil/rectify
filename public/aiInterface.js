@@ -36,10 +36,25 @@ export class AIInterface {
     }
 
     createUI() {
-        // Find or create AI panel in the dashboard
-        const dashboard = document.querySelector('.dashboard');
-        if (!dashboard) return;
+        // Find the 3D Visualizations card
+        const visualizationCard = Array.from(document.querySelectorAll('.card')).find(card => {
+            const h3 = card.querySelector('h3');
+            return h3 && h3.textContent.includes('3D Visualizations');
+        });
+        
+        if (!visualizationCard) {
+            // Fallback: find dashboard and insert at top
+            const dashboard = document.querySelector('.dashboard');
+            if (!dashboard) return;
+            this.insertAIPanel(dashboard, dashboard.firstChild);
+            return;
+        }
 
+        // Insert AI panel after the 3D Visualizations card
+        this.insertAIPanel(visualizationCard.parentElement, visualizationCard.nextSibling);
+    }
+
+    insertAIPanel(parent, insertBefore) {
         // Create AI control panel
         const aiPanel = document.createElement('div');
         aiPanel.className = 'ai-panel';
@@ -81,12 +96,18 @@ export class AIInterface {
             </div>
         `;
 
-        // Insert AI panel at the top of dashboard
-        dashboard.insertBefore(aiPanel, dashboard.firstChild);
+        // Insert AI panel after the 3D Visualizations card
+        if (insertBefore) {
+            parent.insertBefore(aiPanel, insertBefore);
+        } else {
+            parent.appendChild(aiPanel);
+        }
 
         // Setup toggle button
         const toggleBtn = document.getElementById('ai-toggle-btn');
-        toggleBtn.addEventListener('click', () => this.toggleAI());
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => this.toggleAI());
+        }
 
         // Add CSS styles
         this.injectStyles();
@@ -228,7 +249,6 @@ export class AIInterface {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 border-radius: 12px;
                 padding: 20px;
-                margin-bottom: 20px;
                 color: white;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             }
