@@ -48,8 +48,11 @@ sensor_app = None
 sensor_task = None
 stop_event = threading.Event()
 measurement_count = 0
+<<<<<<< HEAD
 ai_enabled = False  # Toggle for AI classification
 form_analysis_enabled = False  # Toggle for form analysis + coaching
+=======
+>>>>>>> yasmin
 
 
 class AsyncLoopThread(threading.Thread):
@@ -97,6 +100,7 @@ class SensorManager:
         
     def on_measurement(self, measurement: fl.Measurement):
         """Called when a measurement is received from the sensor."""
+<<<<<<< HEAD
         global ai_enabled, ai_classifier
 
         try:
@@ -107,11 +111,25 @@ class SensorManager:
             angles = measurement.angles
 
             # Convert radians to degrees for display
+=======
+        try:
+            # Calculate orientation from accelerometer
+            orientation = fl.CaseOrientation.from_acc(measurement.acc)
+            
+            # Get angles
+            angles = measurement.angles
+            
+            # Convert radians to degrees
+>>>>>>> yasmin
             bend_deg = angles.bend * 180 / math.pi
             pitch_deg = orientation.pitch * 180 / math.pi
             roll_deg = orientation.roll * 180 / math.pi
 
+<<<<<<< HEAD
             # Convert measurement to dict for JSON serialization (for UI)
+=======
+            # Convert measurement to dict for JSON serialization
+>>>>>>> yasmin
             data = {
                 'timestamp': measurement.timestamp,
                 'bend': bend_deg,
@@ -119,6 +137,7 @@ class SensorManager:
                 'roll': roll_deg,
                 'raw_data': str(measurement)
             }
+<<<<<<< HEAD
 
             # Emit raw measurement data
             socketio.emit('measurement_data', data)
@@ -176,6 +195,9 @@ class SensorManager:
                     if analysis:
                         socketio.emit('form_analysis', analysis)
 
+=======
+            socketio.emit('measurement_data', data)
+>>>>>>> yasmin
             self.reconnect_attempts = 0  # Reset on successful data
         except Exception as e:
             print(f"Error processing measurement: {e}")
@@ -370,13 +392,18 @@ def handle_stop_measurement():
 def handle_disconnect_sensor():
     """Handle sensor disconnection request."""
     print("Disconnect sensor request")
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> yasmin
     # Run disconnect using the persistent event loop
     async_loop_thread.run_coroutine(
         sensor_manager.disconnect()
     )
 
 
+<<<<<<< HEAD
 @socketio.on('enable_ai')
 def handle_enable_ai(data=None):
     """Enable AI classification."""
@@ -490,6 +517,8 @@ def handle_reset_session():
     emit('session_reset', {'success': True})
 
 
+=======
+>>>>>>> yasmin
 if __name__ == '__main__':
     try:
         host = os.environ.get('FLEXTAIL_BACKEND_HOST', '0.0.0.0')
