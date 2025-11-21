@@ -10,6 +10,7 @@ export class AIInterface {
         this.enabled = false;
         this.currentPrediction = null;
         this.bufferStatus = null;
+        this.available = false;
 
         this.setupSocketListeners();
         this.createUI();
@@ -36,9 +37,11 @@ export class AIInterface {
     }
 
     createUI() {
-        // Find or create AI panel in the dashboard
+        // Find dashboard + main visualization panel
         const dashboard = document.querySelector('.dashboard');
         if (!dashboard) return;
+        const mainPanel = dashboard.querySelector('.main-panel');
+        if (!mainPanel) return;
 
         // Create AI control panel
         const aiPanel = document.createElement('div');
@@ -81,8 +84,9 @@ export class AIInterface {
             </div>
         `;
 
-        // Insert AI panel at the top of dashboard
-        dashboard.insertBefore(aiPanel, dashboard.firstChild);
+        // Place AI panel within shared AI/Coach row
+        const row = this.getOrCreateAIRow(mainPanel);
+        row.appendChild(aiPanel);
 
         // Setup toggle button
         const toggleBtn = document.getElementById('ai-toggle-btn');
@@ -96,18 +100,27 @@ export class AIInterface {
         if (this.enabled) {
             this.socket.emit('disable_ai');
         } else {
+            if (!this.available) {
+                this.showWarning('AI classifier not available. Train the model to enable AI.');
+                return;
+            }
             this.socket.emit('enable_ai');
         }
     }
 
     updateAIStatus(status) {
         this.enabled = status.enabled;
+        this.available = Boolean(status.available);
 
         const statusDot = document.querySelector('.status-indicator .dot');
         const statusText = document.getElementById('ai-status-text');
         const toggleBtn = document.getElementById('ai-toggle-btn');
         const bufferStatus = document.getElementById('ai-buffer-status');
         const predictionPanel = document.getElementById('ai-prediction');
+
+        if (!statusDot || !statusText || !toggleBtn || !bufferStatus || !predictionPanel) {
+            return;
+        }
 
         if (status.enabled) {
             statusDot.className = 'dot active';
@@ -124,8 +137,22 @@ export class AIInterface {
             predictionPanel.style.display = 'none';
         }
 
-        // Show warning if model not loaded
-        if (!status.model_loaded && status.enabled) {
+        // Handle availability
+        if (!this.available) {
+            toggleBtn.disabled = true;
+            toggleBtn.classList.add('btn-disabled');
+            statusText.textContent = 'AI Unavailable';
+            this.showWarning('AI classifier not available. Train the model first.');
+        } else {
+            toggleBtn.disabled = false;
+            toggleBtn.classList.remove('btn-disabled');
+            if (!status.enabled) {
+                this.hideWarning();
+            }
+        }
+
+        // Show warning if model not loaded while enabled
+        if (status.enabled && !status.model_loaded && this.available) {
             this.showWarning('AI model not loaded. Using demo mode.');
         }
     }
@@ -217,6 +244,13 @@ export class AIInterface {
         }
     }
 
+    hideWarning() {
+        const warningEl = document.getElementById('ai-warning');
+        if (warningEl) {
+            warningEl.style.display = 'none';
+        }
+    }
+
     getCurrentPrediction() {
         return this.currentPrediction;
     }
@@ -224,13 +258,26 @@ export class AIInterface {
     injectStyles() {
         const style = document.createElement('style');
         style.textContent = `
+            .ai-coach-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                margin-top: 20px;
+            }
+
+            .ai-coach-row > * {
+                flex: 1;
+                min-width: 280px;
+            }
+
             .ai-panel {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, #0f172a 0%, #1f2937 100%);
                 border-radius: 12px;
                 padding: 20px;
-                margin-bottom: 20px;
+                margin-bottom: 0;
                 color: white;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                flex: 1;
             }
 
             .ai-header {
@@ -295,12 +342,12 @@ export class AIInterface {
 
             .progress-fill {
                 height: 100%;
-                background: #60a5fa;
+                background: #38bdf8;
                 transition: width 0.3s ease;
             }
 
             .progress-fill.ready {
-                background: #4ade80;
+                background: #22c55e;
             }
 
             .buffer-text {
@@ -384,7 +431,7 @@ export class AIInterface {
 
             .prob-bar {
                 height: 100%;
-                background: linear-gradient(90deg, #60a5fa, #a78bfa);
+                background: linear-gradient(90deg, #38bdf8, #6366f1);
                 transition: width 0.5s ease;
             }
 
@@ -398,14 +445,14 @@ export class AIInterface {
             .ai-warning {
                 margin-top: 12px;
                 padding: 8px 12px;
-                background: rgba(251, 191, 36, 0.3);
+                background: rgba(251, 191, 36, 0.15);
                 border-left: 3px solid #fbbf24;
                 border-radius: 4px;
                 font-size: 0.85em;
             }
 
             .btn-secondary {
-                background: #6b7280;
+                background: #1f2937;
                 color: white;
                 border: none;
                 padding: 8px 16px;
@@ -416,11 +463,11 @@ export class AIInterface {
             }
 
             .btn-secondary:hover {
-                background: #4b5563;
+                background: #374151;
             }
 
             .btn-danger {
-                background: #ef4444;
+                background: #b91c1c;
                 color: white;
                 border: none;
                 padding: 8px 16px;
@@ -431,10 +478,33 @@ export class AIInterface {
             }
 
             .btn-danger:hover {
-                background: #dc2626;
+                background: #991b1b;
+            }
+
+            .btn-disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
             }
         `;
         document.head.appendChild(style);
+    }
+
+    getOrCreateAIRow(mainPanel) {
+        let row = document.getElementById('ai-coach-row');
+        if (row) return row;
+
+        row = document.createElement('div');
+        row.id = 'ai-coach-row';
+        row.className = 'ai-coach-row';
+
+        const vizCard = mainPanel.querySelector('.card');
+        if (vizCard) {
+            vizCard.insertAdjacentElement('afterend', row);
+        } else {
+            mainPanel.appendChild(row);
+        }
+
+        return row;
     }
 }
 

@@ -7,10 +7,12 @@ class CoachInterface {
     constructor(socket) {
         this.socket = socket;
         this.enabled = false;
+        this.available = false;
         this.currentAnalysis = null;
 
         this.setupSocketListeners();
         this.createUI();
+        this.requestStatus();
     }
 
     setupSocketListeners() {
@@ -28,7 +30,11 @@ class CoachInterface {
         // Form status
         this.socket.on('form_status', (status) => {
             this.enabled = status.enabled;
+            this.available = status.available;
             this.updateToggleButton();
+            if (!this.available) {
+                this.showAvailabilityMessage('Form analyzer not available. Train the form model to enable the AI Coach.');
+            }
         });
 
         // Session summary
@@ -38,6 +44,11 @@ class CoachInterface {
     }
 
     createUI() {
+        // Locate layout containers
+        const dashboard = document.querySelector('.dashboard');
+        if (!dashboard) return;
+        const mainPanel = dashboard.querySelector('.main-panel') || dashboard;
+
         // Main coach panel
         const panel = document.createElement('div');
         panel.id = 'coach-panel';
@@ -108,29 +119,46 @@ class CoachInterface {
         // Add styles
         this.addStyles();
 
-        // Append to body
-        document.body.appendChild(panel);
+        // Insert panel within shared AI/Coach row
+        const row = this.getOrCreateAIRow(mainPanel);
+        row.appendChild(panel);
 
         // Setup event listeners
         document.getElementById('coach-toggle').addEventListener('click', () => this.toggleCoach());
         document.getElementById('session-reset').addEventListener('click', () => this.resetSession());
     }
 
+    requestStatus() {
+        if (!this.socket) return;
+        this.socket.emit('get_form_status');
+        this.socket.emit('get_session_summary');
+    }
+
     addStyles() {
         const style = document.createElement('style');
         style.textContent = `
+            .ai-coach-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                margin-top: 20px;
+            }
+
+            .ai-coach-row > * {
+                flex: 1;
+                min-width: 280px;
+            }
+
             #coach-panel {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                width: 320px;
-                background: linear-gradient(135deg, #1a5f2a 0%, #0d3d18 100%);
+                background: linear-gradient(135deg, #0f172a 0%, #111827 100%);
                 border-radius: 16px;
                 padding: 20px;
                 color: white;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                z-index: 1000;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+                margin-top: 0;
+                flex: 1;
+                min-width: 280px;
             }
 
             .coach-header {
@@ -170,22 +198,28 @@ class CoachInterface {
             }
 
             .coach-btn:not(.secondary) {
-                background: #4ade80;
-                color: #0a2e14;
+                background: #22d3ee;
+                color: #0f172a;
             }
 
             .coach-btn:not(.secondary):hover {
-                background: #22c55e;
+                background: #06b6d4;
             }
 
             .coach-btn.secondary {
-                background: rgba(255,255,255,0.2);
-                color: white;
+                background: rgba(148,163,184,0.15);
+                color: #e2e8f0;
             }
 
             .coach-btn.active {
-                background: #ef4444;
-                color: white;
+                background: #b91c1c;
+                color: #fee2e2;
+            }
+
+            .coach-btn.disabled,
+            .coach-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
             }
 
             .form-indicator {
@@ -207,13 +241,13 @@ class CoachInterface {
             }
 
             .form-quality-circle.good {
-                background: linear-gradient(135deg, #22c55e, #16a34a);
-                box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+                background: linear-gradient(135deg, #22c55e, #15803d);
+                box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
             }
 
             .form-quality-circle.bad {
-                background: linear-gradient(135deg, #f59e0b, #d97706);
-                box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+                background: linear-gradient(135deg, #f97316, #c2410c);
+                box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
             }
 
             .form-label {
@@ -369,12 +403,27 @@ class CoachInterface {
         if (this.enabled) {
             this.socket.emit('disable_form_analysis');
         } else {
+            if (!this.available) {
+                this.showAvailabilityMessage('Form analyzer not available. Train the form model first.');
+                return;
+            }
             this.socket.emit('enable_form_analysis');
         }
     }
 
     updateToggleButton() {
         const btn = document.getElementById('coach-toggle');
+        if (!btn) return;
+
+        if (!this.available) {
+            btn.textContent = 'Coach Unavailable';
+            btn.disabled = true;
+            btn.classList.add('disabled');
+            return;
+        }
+
+        btn.disabled = false;
+        btn.classList.remove('disabled');
         if (this.enabled) {
             btn.textContent = 'Disable Coach';
             btn.classList.add('active');
@@ -397,8 +446,10 @@ class CoachInterface {
         const bar = document.getElementById('coach-buffer-bar');
         const text = document.getElementById('coach-buffer-text');
 
-        bar.style.width = `${status.percentage}%`;
-        text.textContent = `${Math.round(status.percentage)}%`;
+        if (bar && text) {
+            bar.style.width = `${status.percentage}%`;
+            text.textContent = `${Math.round(status.percentage)}%`;
+        }
     }
 
     updateUI(analysis) {
@@ -417,7 +468,9 @@ class CoachInterface {
 
         // Update tips
         const tipsList = document.getElementById('tips-list');
-        tipsList.innerHTML = coaching.tips.map(tip => `<li>${tip}</li>`).join('');
+        if (tipsList) {
+            tipsList.innerHTML = coaching.tips.map(tip => `<li>${tip}</li>`).join('');
+        }
 
         // Update metrics
         this.updateMetrics(coaching.metrics);
@@ -457,6 +510,31 @@ class CoachInterface {
     showSessionSummary(summary) {
         // Could show a modal or update a summary panel
         console.log('Session Summary:', summary);
+    }
+
+    showAvailabilityMessage(message) {
+        const messageEl = document.getElementById('coach-text');
+        if (messageEl) {
+            messageEl.textContent = message;
+        }
+    }
+
+    getOrCreateAIRow(mainPanel) {
+        let row = document.getElementById('ai-coach-row');
+        if (row) return row;
+
+        row = document.createElement('div');
+        row.id = 'ai-coach-row';
+        row.className = 'ai-coach-row';
+
+        const vizCard = mainPanel.querySelector('.card');
+        if (vizCard) {
+            vizCard.insertAdjacentElement('afterend', row);
+        } else {
+            mainPanel.appendChild(row);
+        }
+
+        return row;
     }
 }
 

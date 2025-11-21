@@ -480,15 +480,17 @@ class App {
         const exerciseDisplay = document.getElementById('exercise-display');
         const confidenceDisplay = document.getElementById('confidence-display');
         
-        if (recognition && recognition.exercise) {
-            exerciseDisplay.textContent = recognition.exercise.charAt(0).toUpperCase() + 
-                                         recognition.exercise.slice(1);
-            confidenceDisplay.textContent = recognition.confidence
-                ? `Confidence: ${(recognition.confidence * 100).toFixed(0)}%`
-                : '';
-        } else {
-            exerciseDisplay.textContent = 'Detecting...';
-            confidenceDisplay.textContent = '';
+        if (exerciseDisplay && confidenceDisplay) {
+            if (recognition && recognition.exercise) {
+                exerciseDisplay.textContent = recognition.exercise.charAt(0).toUpperCase() + 
+                                             recognition.exercise.slice(1);
+                confidenceDisplay.textContent = recognition.confidence
+                    ? `Confidence: ${(recognition.confidence * 100).toFixed(0)}%`
+                    : '';
+            } else {
+                exerciseDisplay.textContent = 'Detecting...';
+                confidenceDisplay.textContent = '';
+            }
         }
 
         // Update quality metrics with progress bars
@@ -500,43 +502,59 @@ class App {
         const symmetryScore = safeMetrics.symmetry > 0 ? safeMetrics.symmetry : 0;
         
         // Update overall score
-        document.getElementById('overall-score').textContent = 
-            overallScore > 0 ? `${overallScore.toFixed(0)}%` : '--';
-        document.getElementById('overall-progress').style.width = `${overallScore}%`;
+        const overallScoreEl = document.getElementById('overall-score');
+        const overallProgressEl = document.getElementById('overall-progress');
+        if (overallScoreEl && overallProgressEl) {
+            overallScoreEl.textContent = overallScore > 0 ? `${overallScore.toFixed(0)}%` : '--';
+            overallProgressEl.style.width = `${overallScore}%`;
+        }
         
-        // Update individual metrics with progress bars
-        document.getElementById('depth-score').textContent = 
-            depthScore > 0 ? `${depthScore.toFixed(0)}%` : '--';
-        document.getElementById('depth-progress').style.width = `${depthScore}%`;
+        const depthScoreEl = document.getElementById('depth-score');
+        const depthProgressEl = document.getElementById('depth-progress');
+        if (depthScoreEl && depthProgressEl) {
+            depthScoreEl.textContent = depthScore > 0 ? `${depthScore.toFixed(0)}%` : '--';
+            depthProgressEl.style.width = `${depthScore}%`;
+        }
         
-        document.getElementById('stability-score').textContent = 
-            stabilityScore > 0 ? `${stabilityScore.toFixed(0)}%` : '--';
-        document.getElementById('stability-progress').style.width = `${stabilityScore}%`;
+        const stabilityScoreEl = document.getElementById('stability-score');
+        const stabilityProgressEl = document.getElementById('stability-progress');
+        if (stabilityScoreEl && stabilityProgressEl) {
+            stabilityScoreEl.textContent = stabilityScore > 0 ? `${stabilityScore.toFixed(0)}%` : '--';
+            stabilityProgressEl.style.width = `${stabilityScore}%`;
+        }
         
-        document.getElementById('posture-score').textContent = 
-            postureScore > 0 ? `${postureScore.toFixed(0)}%` : '--';
-        document.getElementById('posture-progress').style.width = `${postureScore}%`;
+        const postureScoreEl = document.getElementById('posture-score');
+        const postureProgressEl = document.getElementById('posture-progress');
+        if (postureScoreEl && postureProgressEl) {
+            postureScoreEl.textContent = postureScore > 0 ? `${postureScore.toFixed(0)}%` : '--';
+            postureProgressEl.style.width = `${postureScore}%`;
+        }
         
-        document.getElementById('symmetry-score').textContent = 
-            symmetryScore > 0 ? `${symmetryScore.toFixed(0)}%` : '--';
-        document.getElementById('symmetry-progress').style.width = `${symmetryScore}%`;
+        const symmetryScoreEl = document.getElementById('symmetry-score');
+        const symmetryProgressEl = document.getElementById('symmetry-progress');
+        if (symmetryScoreEl && symmetryProgressEl) {
+            symmetryScoreEl.textContent = symmetryScore > 0 ? `${symmetryScore.toFixed(0)}%` : '--';
+            symmetryProgressEl.style.width = `${symmetryScore}%`;
+        }
         
         // Update risk indicator
         this.updateRiskIndicator(overallScore);
 
         // Update feedback
         const feedbackContainer = document.getElementById('feedback-container');
-        feedbackContainer.innerHTML = '';
-        
-        if (feedback && feedback.length > 0) {
-            feedback.forEach(item => {
-                const feedbackEl = document.createElement('div');
-                feedbackEl.className = `feedback-item feedback-${item.type}`;
-                feedbackEl.textContent = item.message;
-                feedbackContainer.appendChild(feedbackEl);
-            });
-        } else {
-            feedbackContainer.innerHTML = '<p class="feedback-placeholder">No feedback yet</p>';
+        if (feedbackContainer) {
+            feedbackContainer.innerHTML = '';
+            
+            if (feedback && feedback.length > 0) {
+                feedback.forEach(item => {
+                    const feedbackEl = document.createElement('div');
+                    feedbackEl.className = `feedback-item feedback-${item.type}`;
+                    feedbackEl.textContent = item.message;
+                    feedbackContainer.appendChild(feedbackEl);
+                });
+            } else {
+                feedbackContainer.innerHTML = '<p class="feedback-placeholder">No feedback yet</p>';
+            }
         }
 
         // Update sensor data display (use adapted data for display)
