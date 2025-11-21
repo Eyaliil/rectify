@@ -48,11 +48,8 @@ sensor_app = None
 sensor_task = None
 stop_event = threading.Event()
 measurement_count = 0
-<<<<<<< HEAD
 ai_enabled = False  # Toggle for AI classification
 form_analysis_enabled = False  # Toggle for form analysis + coaching
-=======
->>>>>>> yasmin
 
 
 class AsyncLoopThread(threading.Thread):

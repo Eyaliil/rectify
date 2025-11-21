@@ -45,7 +45,7 @@ You can run the layers independently or together, depending on whether live sens
 ## Prerequisites
 
 - Node.js (v16 or higher) + npm
-- Python 3.10+ (for the backend) with `uv` or `pip`
+- Python 3.12 (for the backend) with `uv` or `pip`
 - FlexTail hardware plus the `flexlib` and `fiffi_unleashed` wheels (see `backend/README.md`)
 
 ## Installation

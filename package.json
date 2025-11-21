@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "backend": "cd backend && python app.py"
+    "backend": "cd backend && python3.12 app.py"
   },
   "keywords": ["threejs", "webapp"],
   "author": "",
