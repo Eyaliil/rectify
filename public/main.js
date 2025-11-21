@@ -3,6 +3,7 @@
 import { ExerciseAnalyzer } from './exerciseAnalyzer.js';
 import { FlexTail3DViewer } from './FlexTail3DViewer.js';
 import { AIInterface } from './aiInterface.js';
+import { CoachInterface } from './coachInterface.js';
 
 const DEFAULT_BACKEND_PORT = 5000;
 
@@ -629,6 +630,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.flexTailBridge.socket) {
         window.aiInterface = new AIInterface(window.flexTailBridge.socket);
         console.log('[App] AI Interface initialized');
+
+        // Initialize AI Coach interface
+        window.coachInterface = new CoachInterface(window.flexTailBridge.socket);
+        console.log('[App] AI Coach Interface initialized');
     }
 
     // Don't initialize immediately - wait for analysis view to be shown

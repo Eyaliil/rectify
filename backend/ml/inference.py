@@ -23,7 +23,7 @@ class ExerciseClassifierInference:
 
     def __init__(
         self,
-        model_path='models/trained/best_model.pth',
+        model_path='models/trained/model_classification.pth',
         window_size=150,
         min_confidence=0.3,
         device=None
@@ -297,7 +297,7 @@ class DummyClassifier:
             }
 
 
-def create_classifier(model_path='models/trained/best_model.pth', use_dummy=False):
+def create_classifier(model_path='models/trained/model_classification.pth', use_dummy=False):
     """
     Factory function to create a classifier.
 

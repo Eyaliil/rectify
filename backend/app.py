@@ -29,6 +29,15 @@ except Exception as e:
     print("  Continuing without AI features")
     ai_classifier = None
 
+# Form analysis with AI Coach
+try:
+    from ml.form_inference import create_form_analyzer
+    form_analyzer = create_form_analyzer()
+    print("✓ Form analyzer initialized")
+except Exception as e:
+    print(f"⚠ Form analyzer initialization failed: {e}")
+    print("  Form analysis not available (train form model first)")
+    form_analyzer = None
 
 app = Flask(__name__)
 CORS(app)
@@ -40,6 +49,7 @@ sensor_task = None
 stop_event = threading.Event()
 measurement_count = 0
 ai_enabled = False  # Toggle for AI classification
+form_analysis_enabled = False  # Toggle for form analysis + coaching
 
 
 class AsyncLoopThread(threading.Thread):
@@ -150,6 +160,21 @@ class SensorManager:
                     prediction = ai_classifier.predict()
                     if prediction:
                         socketio.emit('ai_classification', prediction)
+
+            # Form Analysis with AI Coach
+            if form_analysis_enabled and form_analyzer and form_analyzer.is_loaded:
+                # Add measurement to form analyzer buffer
+                form_ready = form_analyzer.add_measurement(ai_data)
+
+                # Emit form buffer status
+                form_buffer = form_analyzer.get_buffer_status()
+                socketio.emit('form_buffer_status', form_buffer)
+
+                # Perform form analysis when ready
+                if form_ready:
+                    analysis = form_analyzer.predict()
+                    if analysis:
+                        socketio.emit('form_analysis', analysis)
 
             self.reconnect_attempts = 0  # Reset on successful data
         except Exception as e:
@@ -395,6 +420,74 @@ def handle_get_ai_status():
         'model_loaded': ai_classifier.is_loaded if ai_classifier else False,
         'buffer_status': ai_classifier.get_buffer_status() if ai_classifier else None
     })
+
+
+# ==================== Form Analysis & AI Coach ====================
+
+@socketio.on('enable_form_analysis')
+def handle_enable_form_analysis(data=None):
+    """Enable form analysis with AI coaching."""
+    global form_analysis_enabled, form_analyzer
+
+    if form_analyzer is None:
+        emit('error', {'message': 'Form analyzer not available. Train the form model first.'})
+        return
+
+    form_analysis_enabled = True
+    form_analyzer.reset_session()
+
+    print("Form analysis + AI Coach enabled")
+    emit('form_status', {
+        'enabled': True,
+        'model_loaded': form_analyzer.is_loaded if form_analyzer else False
+    })
+
+
+@socketio.on('disable_form_analysis')
+def handle_disable_form_analysis():
+    """Disable form analysis."""
+    global form_analysis_enabled, form_analyzer
+
+    form_analysis_enabled = False
+
+    print("Form analysis disabled")
+    emit('form_status', {'enabled': False})
+
+
+@socketio.on('get_form_status')
+def handle_get_form_status():
+    """Get current form analysis status."""
+    global form_analysis_enabled, form_analyzer
+
+    emit('form_status', {
+        'enabled': form_analysis_enabled,
+        'available': form_analyzer is not None,
+        'model_loaded': form_analyzer.is_loaded if form_analyzer else False,
+        'buffer_status': form_analyzer.get_buffer_status() if form_analyzer else None
+    })
+
+
+@socketio.on('get_session_summary')
+def handle_get_session_summary():
+    """Get workout session summary."""
+    global form_analyzer
+
+    if form_analyzer:
+        summary = form_analyzer.get_session_summary()
+        emit('session_summary', summary)
+    else:
+        emit('session_summary', {'total_reps': 0, 'form_score': 0})
+
+
+@socketio.on('reset_session')
+def handle_reset_session():
+    """Reset workout session."""
+    global form_analyzer
+
+    if form_analyzer:
+        form_analyzer.reset_session()
+
+    emit('session_reset', {'success': True})
 
 
 if __name__ == '__main__':

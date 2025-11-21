@@ -1,0 +1,187 @@
+{
+  "dl": {
+    "Arwed_DL_Better_rsf_v1_2025-11-19_11-45-01.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Arwed"
+    },
+    "Arwed_DL_Worse_rsf_v1_2025-11-19_11-45-38.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Arwed"
+    },
+    "Jonas_DL_Better_rsf_v1_2025-11-19_10-58-48.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Jonas"
+    },
+    "Jonas_DL_Worse_rsf_v1_2025-11-19_10-59-52.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Jonas"
+    },
+    "Kiana_DL_Correct_rsf_v1_2025-11-19_11-12-10.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Kiana"
+    },
+    "Kiana_DL_Worse_rsf_v1_2025-11-19_11-13-18.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Kiana"
+    },
+    "Tom_DL_Correct_rsf_v1_2025-11-19_11-25-22.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Tom"
+    },
+    "Tom_DL_Worse_rsf_v1_2025-11-19_11-26-03.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Tom"
+    }
+  },
+  "ohp": {
+    "Arwed_OHP_Better_rsf_v1_2025-11-19_11-47-38.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Arwed"
+    },
+    "Arwed_OHP_Worse_rsf_v1_2025-11-19_11-48-50.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Arwed"
+    },
+    "Jonas_OHP_Better_rsf_v1_2025-11-19_11-01-14.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Jonas"
+    },
+    "Jonas_OHP_Worse_rsf_v1_2025-11-19_11-02-17.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Jonas"
+    },
+    "Kiana_OHP_Worse_rsf_v1_2025-11-19_11-15-12.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Kiana"
+    },
+    "Tom_OHP_Correct_rsf_v1_2025-11-19_11-28-02.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Tom"
+    },
+    "Tom_OHP_Worse_rsf_v1_2025-11-19_11-28-41.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Tom"
+    }
+  },
+  "pushup": {
+    "Arwed_PushUp_Better_rsf_v1_2025-11-19_11-54-33.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Arwed"
+    },
+    "Arwed_PushUp_Worse_rsf_v1_2025-11-19_11-55-22.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Arwed"
+    },
+    "Jonas_PushUp_Better_rsf_v1_2025-11-19_11-08-26.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Jonas"
+    },
+    "Jonas_PushUp_Worse_rsf_v1_2025-11-19_11-09-10.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Jonas"
+    },
+    "Kiana_PushUp_Worse_Women_rsf_v1_2025-11-19_11-19-50.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Kiana"
+    },
+    "Tom_PushUp_Better_rsf_v1_2025-11-19_11-33-53.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Tom"
+    },
+    "Tom_PushUp_Worse_rsf_v1_2025-11-19_11-35-01.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Tom"
+    }
+  },
+  "row": {
+    "Arwed_Row_Better_rsf_v1_2025-11-19_11-52-12.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Arwed"
+    },
+    "Arwed_Row_Worse_rsf_v1_2025-11-19_11-52-46.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Arwed"
+    },
+    "Jonas_Row_Better_rsf_v1_2025-11-19_11-06-20.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Jonas"
+    },
+    "Jonas_Row_Worse_rsf_v1_2025-11-19_11-07-27.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Jonas"
+    },
+    "Kiana_Row_Worse_rsf_v1_2025-11-19_11-18-39.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Kiana"
+    },
+    "Tom_Row_Better_rsf_v1_2025-11-19_11-32-05.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Tom"
+    },
+    "Tom_Row_Worse_rsf_v1_2025-11-19_11-32-52.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Tom"
+    }
+  },
+  "squat": {
+    "Arwed_Squat_Worse_rsf_v1_2025-11-19_11-50-04.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Arwed"
+    },
+    "Jonas_Squat_Better_rsf_v1_2025-11-19_11-03-22.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Jonas"
+    },
+    "Jonas_Squat_Worse_rsf_v1_2025-11-19_11-04-59.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Jonas"
+    },
+    "Kiana_Squat_Worse_4x_rsf_v1_2025-11-19_11-17-28.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Kiana"
+    },
+    "Tom_Squat_Better_rsf_v1_2025-11-19_11-30-05.rsf": {
+      "reps": 10,
+      "form": "good",
+      "person": "Tom"
+    },
+    "Tom_Squat_Worse_rsf_v1_2025-11-19_11-30-45.rsf": {
+      "reps": 10,
+      "form": "bad",
+      "person": "Tom"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "exercise_label2id": {
+    "dl": 0,
+    "ohp": 1,
+    "pushup": 2,
+    "row": 3,
+    "squat": 4
+  },
+  "exercise_id2label": {
+    "0": "dl",
+    "1": "ohp",
+    "2": "pushup",
+    "3": "row",
+    "4": "squat"
+  },
+  "form_label2id": {
+    "good": 0,
+    "bad": 1
+  },
+  "form_id2label": {
+    "0": "good",
+    "1": "bad"
+  },
+  "features": [
+    "lumbarAngle",
+    "twist",
+    "lateral",
+    "sagittal",
+    "lateralApprox",
+    "sagittalApprox",
+    "acceleration",
+    "gyro"
+  ],
+  "window_size": 150,
+  "num_exercises": 5,
+  "num_form_classes": 2,
+  "input_size": 8
+}
